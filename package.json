@@ -10,8 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@decentralized-identity/ion-tools": "^1.1.4",
+    "face-api.js": "^0.22.2",
+    "html5-qrcode": "^2.3.8",
+    "idb": "^8.0.3",
+    "qrcode": "^1.5.4",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react-dom": "^19.2.4",
+    "react-router-dom": "^7.14.0",
+    "secrets.js-grempe": "^2.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
