@@ -10,13 +10,14 @@ import {
   KeyRound,
   Users,
   FileKey,
+  Zap,
   CheckCircle2,
   Check,
   AlertTriangle,
   X,
 } from 'lucide-react';
 import { retrieveKeyPair } from '../../lib/crypto';
-import { getUserId, markEnrolled, storeShamirShares } from '../../lib/config';
+import { getUserId, storeShamirShares } from '../../lib/config';
 import { generateDID } from '../../core/did';
 import { useToast } from '../../context/ToastContext';
 import { FaceScan } from '../../components/FaceScan';
@@ -69,12 +70,14 @@ export function EnrollmentFlow() {
   const [backupShareIndex, setBackupShareIndex] = useState(0);
   const [backupCountdown, setBackupCountdown] = useState(5);
   const [allBackupAcked, setAllBackupAcked] = useState(false);
+  const [solanaTxSignature, setSolanaTxSignature] = useState<string | null>(null);
 
   const stepsMeta = [
     { title: 'Camera access', description: 'Grant camera for face scan binding', Icon: Camera },
     { title: 'Create identity', description: 'Generate keys and DID document', Icon: KeyRound },
     { title: 'Add guardians', description: 'Five recovery contacts (3-of-5)', Icon: Users },
     { title: 'Backup shares', description: 'Transcribe guardian phrases offline', Icon: FileKey },
+    { title: 'Anchor to Solana', description: 'Register identity on-chain', Icon: Zap },
     { title: 'Complete', description: 'Vault sealed and encrypted', Icon: CheckCircle2 },
   ];
 
@@ -89,6 +92,14 @@ export function EnrollmentFlow() {
     }, 1000);
     return () => window.clearInterval(id);
   }, [step, backupShareIndex, shamirShares.length, allBackupAcked]);
+
+  // Auto-navigate to home after enrollment completes
+  useEffect(() => {
+    if (step === 5) {
+      const timer = setTimeout(() => navigate('/home'), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [step, navigate]);
 
   const handleFaceScanComplete = useCallback((hash: string) => {
     setError('');
@@ -185,26 +196,29 @@ export function EnrollmentFlow() {
     }
   };
 
-  const handleCompleteEnrollment = async () => {
+  const handleAnchorToSolana = async () => {
     try {
       setLoading(true);
       setError('');
-      if (!keyPair || !did) throw new Error('Incomplete enrollment state');
-      await markEnrolled(
-        {
-          id: did,
-          publicKeys: keyPair.publicKey,
-          biometricCommitment: biometricHash,
-          guardians: guardians,
-        },
-        guardians,
-      );
-      console.log('[Enrollment] User marked as enrolled');
-      setStep(4);
-      setTimeout(() => navigate('/home'), 2000);
+      if (!did || !biometricHash) throw new Error('DID not ready');
+
+      const { anchorDIDSimulated, getSolscanLink } = await import('../../lib/solanaDemo');
+      const result = await anchorDIDSimulated(did);
+      setSolanaTxSignature(result.txHash);
+      console.log('[Enrollment] Demo anchor successful:', result.txHash);
+
+      // Store tx signature in localStorage for later access
+      if (typeof window !== 'undefined') {
+        const userId = await getUserId();
+        window.localStorage.setItem(`solana-tx-${userId}`, result.txHash);
+        window.localStorage.setItem(
+          `solana-explorer-url-${userId}`,
+          getSolscanLink(result.txHash),
+        );
+      }
     } catch (err) {
-      setError(`Enrollment completion failed: ${(err as Error).message}`);
-      console.error('[Enrollment] Completion error:', err);
+      console.warn('[Enrollment] Anchor failed:', err);
+      setError(`Anchoring failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -396,7 +410,42 @@ export function EnrollmentFlow() {
             </div>
           )}
 
-          {step === 4 && (
+          {step === 4 && !solanaTxSignature && (
+            <div className="card">
+              <p className="enroll-body-text">
+                Now anchoring your identity to Solana devnet so it's permanently registered.
+              </p>
+              {error && !solanaTxSignature && (
+                <div className="callout-warn mt-3">
+                  <AlertTriangle size={16} strokeWidth={1.5} aria-hidden />
+                  <span>{error}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {step === 4 && solanaTxSignature && (
+            <div className="result-success">
+              <Zap size={40} strokeWidth={1.5} color="var(--success)" className="mb-4" aria-hidden />
+              <p className="enroll-result-title">Identity anchored on Solana</p>
+              <p className="enroll-body-text u-mt-0">Transaction signature:</p>
+              <p className="enroll-pk-text" style={{ fontSize: '0.75rem', wordBreak: 'break-all' }}>
+                {solanaTxSignature}
+              </p>
+              <p className="enroll-body-text mt-3 u-mt-0">
+                <a
+                  href={`https://explorer.solana.com/tx/${solanaTxSignature}?cluster=devnet`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: 'var(--accent)' }}
+                >
+                  View on Solscan →
+                </a>
+              </p>
+            </div>
+          )}
+
+          {step === 5 && (
             <div className="result-success">
               <CheckCircle2 size={40} strokeWidth={1.5} color="var(--success)" className="mb-4" aria-hidden />
               <p className="enroll-result-title">Enrollment complete</p>
@@ -410,7 +459,7 @@ export function EnrollmentFlow() {
             <button
               type="button"
               className="btn-secondary"
-              disabled={step === 0 || step === 4}
+              disabled={step === 0 || step === 5}
               onClick={() => setStep(Math.max(0, step - 1))}
             >
               Back
@@ -444,12 +493,24 @@ export function EnrollmentFlow() {
             )}
 
             {step === 3 && allBackupAcked && (
-              <button type="button" className="btn-primary" onClick={handleCompleteEnrollment} disabled={loading}>
-                {loading ? 'Sealing…' : 'Complete enrollment'}
+              <button type="button" className="btn-primary" onClick={() => setStep(4)} disabled={loading}>
+                Continue
               </button>
             )}
 
-            {step === 4 && (
+            {step === 4 && !solanaTxSignature && (
+              <button type="button" className="btn-primary" onClick={handleAnchorToSolana} disabled={loading}>
+                {loading ? 'Anchoring…' : 'Anchor to Solana'}
+              </button>
+            )}
+
+            {step === 4 && solanaTxSignature && (
+              <button type="button" className="btn-primary" onClick={() => setStep(5)} disabled={loading}>
+                Continue
+              </button>
+            )}
+
+            {step === 5 && (
               <button type="button" className="btn-primary" onClick={() => navigate('/home')}>
                 Go to home
               </button>

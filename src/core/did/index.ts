@@ -170,3 +170,19 @@ export async function resolveDID(_did: string): Promise<DIDDocument | null> {
   return null;
 }
 
+/**
+ * Re-export new Solana + Arweave v2 functions for direct access
+ * These provide the new tech stack without breaking existing code
+ */
+export { 
+  generateDID as generateDIDKeypair,
+  createDIDDocument as createDIDDocumentFromPublicKey,
+  signWithDID 
+} from './generate'
+
+export { 
+  anchorDIDToSolana,
+  verifyAnchorOnChain 
+} from './anchor'
+
+

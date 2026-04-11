@@ -7,8 +7,10 @@ import { useEffect, useState } from 'react';
 import { Shield } from 'lucide-react';
 import storage from './lib/storage';
 import { initializeAppState } from './lib/config';
+import queue from './lib/queue';
 import { ToastProvider } from './context/ToastContext';
 import { ShellLayout } from './ui/layout/ShellLayout';
+import { OfflineBadge } from './components/OfflineBadge';
 import { RoleSelectPage } from './ui/RoleSelectPage';
 import { RootRedirect } from './ui/RootRedirect';
 import { HomePage } from './ui/HomePage';
@@ -19,6 +21,7 @@ import { RecoveryFlow } from './ui/recovery/RecoveryFlow';
 import { VerifyPage } from './ui/VerifyPage';
 import { SettingsPage } from './ui/SettingsPage';
 import { ShareIdPage } from './ui/ShareIdPage';
+import { SolanaStatusPage } from './ui/SolanaStatusPage';
 import InstallBanner from './components/InstallBanner';
 
 export function App() {
@@ -32,6 +35,8 @@ export function App() {
         const placeholderDeviceKey = crypto.getRandomValues(new Uint8Array(32));
         await storage.init(placeholderDeviceKey.buffer);
         await initializeAppState();
+        // Initialize offline queue for pending operations (non-blocking)
+        await queue.init().catch(err => console.warn('[App] Queue init failed:', err));
       } catch (error) {
         console.error('[App] Storage / app state init failed:', error);
         try {
@@ -88,6 +93,7 @@ export function App() {
   return (
     <div className="app-mount">
       <InstallBanner />
+      <OfflineBadge />
 
       {swUpdateAvailable && (
         <div className="sw-update-bar">
@@ -111,6 +117,7 @@ export function App() {
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/recovery" element={<RecoveryFlow />} />
               <Route path="/share" element={<ShareIdPage />} />
+              <Route path="/solana" element={<SolanaStatusPage />} />
             </Route>
 
             <Route path="/credentials" element={<CredentialsWallet />} />

@@ -1,0 +1,55 @@
+/**
+ * Offline Badge Styling
+ */
+
+.offline-badge {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #fbbf24;
+  color: #78350f;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  font-size: 12px;
+  font-weight: 500;
+  animation: slideIn 0.3s ease-out;
+}
+
+.offline-badge__icon {
+  flex-shrink: 0;
+  stroke-width: 2.5;
+}
+
+.offline-badge__text {
+  white-space: nowrap;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .offline-badge {
+    top: 8px;
+    right: 8px;
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .offline-badge__icon {
+    width: 14px;
+    height: 14px;
+  }
+}

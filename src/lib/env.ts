@@ -12,6 +12,7 @@ declare global {
   interface ImportMetaEnv {
     readonly VITE_SOLANA_NETWORK?: 'devnet' | 'testnet' | 'mainnet'
     readonly VITE_SOLANA_RPC?: string
+    readonly VITE_SOLANA_KEYPAIR?: string
     readonly VITE_ARWEAVE_HOST?: string
     readonly VITE_ARWEAVE_ENV?: 'testnet' | 'mainnet'
     readonly VITE_USDC_MINT?: string
@@ -30,6 +31,7 @@ declare global {
 export const SOLANA_CONFIG = {
   network: (import.meta.env.VITE_SOLANA_NETWORK || 'devnet') as 'devnet' | 'testnet' | 'mainnet',
   rpcUrl: import.meta.env.VITE_SOLANA_RPC || 'https://api.devnet.solana.com',
+  feePayerSecret: import.meta.env.VITE_SOLANA_KEYPAIR || undefined,
 } as const
 
 /**

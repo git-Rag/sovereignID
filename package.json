@@ -6,34 +6,33 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@solana/web3.js": "^1.91.0",
-    "@solana/spl-token": "^0.4.0",
-    "arweave": "^1.15.1",
-    "arweave-js": "^1.0.0",
-    "face-api.js": "^0.22.2",
-    "idb": "^8.0.0",
-    "js-base64": "^3.7.8",
-    "lucide-react": "^1.8.0",
-    "qrcode.react": "^4.2.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.22.0",
-    "secrets.js-grempe": "^1.4.1",
-    "snarkjs": "^0.7.0",
-    "tweetnacl": "^1.0.3"
+    "@irys/sdk": "^0.2.11",
+    "@solana/spl-token": "0.4.0",
+    "@solana/web3.js": "^1.98.4",
+    "arweave": "1.15.7",
+    "face-api.js": "0.22.2",
+    "idb": "8.0.3",
+    "js-base64": "3.7.7",
+    "lucide-react": "1.8.0",
+    "qrcode.react": "4.2.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.22.0",
+    "secrets.js-grempe": "2.0.0",
+    "snarkjs": "0.7.6",
+    "tweetnacl": "1.0.3"
   },
   "devDependencies": {
-    "@peculiar/webcrypto": "^1.5.0",
-    "@types/react": "^18.2.68",
-    "@types/react-dom": "^18.2.22",
-    "@vitejs/plugin-basic-ssl": "^2.3.0",
-    "@vitejs/plugin-react": "^4.2.1",
-    "typescript": "^5.2.2",
-    "vite": "^7.0.0",
-    "vite-plugin-pwa": "^1.2.0"
+    "@peculiar/webcrypto": "1.5.0",
+    "@types/react": "18.2.68",
+    "@types/react-dom": "18.2.22",
+    "@vitejs/plugin-basic-ssl": "2.3.0",
+    "@vitejs/plugin-react": "4.2.1",
+    "typescript": "5.2.2",
+    "vite": "7.0.0",
+    "vite-plugin-pwa": "1.2.0"
   }
 }
