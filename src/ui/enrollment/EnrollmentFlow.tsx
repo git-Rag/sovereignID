@@ -17,7 +17,7 @@ import {
   X,
 } from 'lucide-react';
 import { retrieveKeyPair } from '../../lib/crypto';
-import { getUserId, storeShamirShares } from '../../lib/config';
+import { getUserId, markEnrolled, storeShamirShares } from '../../lib/config';
 import { generateDID } from '../../core/did';
 import { useToast } from '../../context/ToastContext';
 import { FaceScan } from '../../components/FaceScan';
@@ -93,13 +93,28 @@ export function EnrollmentFlow() {
     return () => window.clearInterval(id);
   }, [step, backupShareIndex, shamirShares.length, allBackupAcked]);
 
-  // Auto-navigate to home after enrollment completes
+  // Save enrollment flag, guardian count and auto-navigate to identity display after enrollment completes
   useEffect(() => {
     if (step === 5) {
-      const timer = setTimeout(() => navigate('/home'), 2000);
+      // Persist enrollment state in secure app state and localStorage for route bootstrap
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('isEnrolled', 'true');
+        localStorage.setItem('guardiansCount', guardians.length.toString());
+      }
+
+      (async () => {
+        try {
+          await markEnrolled({ id: did }, guardians);
+        } catch (error) {
+          console.error('[EnrollmentFlow] Failed to persist enrollment state:', error);
+        }
+      })();
+
+      const timer = setTimeout(() => navigate('/identity'), 2000);
       return () => clearTimeout(timer);
     }
-  }, [step, navigate]);
+    return undefined;
+  }, [step, guardians, navigate, did]);
 
   const handleFaceScanComplete = useCallback((hash: string) => {
     setError('');
@@ -511,8 +526,8 @@ export function EnrollmentFlow() {
             )}
 
             {step === 5 && (
-              <button type="button" className="btn-primary" onClick={() => navigate('/home')}>
-                Go to home
+              <button type="button" className="btn-primary" onClick={() => navigate('/identity')}>
+                Go to identity
               </button>
             )}
           </div>

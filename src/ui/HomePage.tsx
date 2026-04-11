@@ -24,6 +24,7 @@ export function HomePage() {
   const { isOnline, lastOnline } = useOnline();
   const [state, setState] = useState<AppState | null>(null);
   const [did, setDid] = useState<string>('');
+  const [guardiansCount, setGuardiansCount] = useState<number>(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,6 +42,20 @@ export function HomePage() {
           localStorage.setItem('sovereignid_initials', ini);
           window.dispatchEvent(new Event('sovereignid-identity-updated'));
         }
+
+        // Use enrolled guardians count from app state if available, otherwise fall back to saved count.
+        if (s.enrolled) {
+          const parsedCount = Array.isArray(s.guardians) ? s.guardians.length : 0;
+          if (parsedCount > 0) {
+            setGuardiansCount(parsedCount);
+          } else {
+            const saved = localStorage.getItem('guardiansCount');
+            setGuardiansCount(saved ? parseInt(saved, 10) : 0);
+          }
+        } else {
+          setGuardiansCount(0);
+          localStorage.removeItem('guardiansCount');
+        }
       } catch (e) {
         console.error(e);
       }
@@ -57,8 +72,7 @@ export function HomePage() {
       ? `did:key:···${did.slice(-12)}`
       : 'did:key:···complete setup to generate your DID';
 
-  const guardianCount = state?.guardians?.length ?? 0;
-  const guardianLabel = guardianCount >= 5 ? '5 assigned' : `${guardianCount} assigned`;
+  const guardianLabel = guardiansCount >= 5 ? '5 assigned' : `${guardiansCount} assigned`;
 
   const lastSync =
     isOnline
