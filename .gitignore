@@ -22,3 +22,14 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+*.tsbuildinfo
+
+# Service worker cache
+sw.js.map
