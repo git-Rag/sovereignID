@@ -14,6 +14,7 @@ import { OfflineBadge } from './components/OfflineBadge';
 import { RoleSelectPage } from './ui/RoleSelectPage';
 import { RootRedirect } from './ui/RootRedirect';
 import { HomePage } from './ui/HomePage';
+import { IdentityDisplayPage } from './ui/IdentityDisplayPage';
 import { EnrollmentFlow } from './ui/enrollment/EnrollmentFlow';
 import { WalletUI } from './ui/wallet/WalletUI';
 import { CredentialsWallet } from './ui/credentials/CredentialsWallet';
@@ -109,6 +110,7 @@ export function App() {
           <Routes>
             <Route path="/welcome" element={<RoleSelectPage />} />
             <Route path="/enrollment" element={<EnrollmentFlow />} />
+            <Route path="/identity" element={<IdentityDisplayPage />} />
 
             <Route element={<ShellLayout />}>
               <Route path="/home" element={<HomePage />} />
