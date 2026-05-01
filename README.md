@@ -158,3 +158,9 @@ npm run lint     # Run ESLint
 ## License
 
 MIT
+
+## Project Info
+
+This project was developed at the DTU Vihaan 9.0 Hackathon in under 24 hours constraint.
+
+---
